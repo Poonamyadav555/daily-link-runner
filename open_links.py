@@ -1,8 +1,9 @@
 import requests
-import datetime
 import time
+from datetime import datetime
 
-WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbycP0bU4tsHOCia7Ej9V1kr8lnaf_2hrh_DWN5Jf-rhK90DPffaHXmeGXIhKo-ABdrH3A/exec"
+# Your Apps Script Web App URL
+SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbycP0bU4tsHOCia7Ej9V1kr8lnaf_2hrh_DWN5Jf-rhK90DPffaHXmeGXIhKo-ABdrH3A/exec"
 
 URLS = [
     "https://feebank.in/order/status",
@@ -17,31 +18,33 @@ URLS = [
     "https://feebank.in/order/OtherCcAvenueStatus/598",
 ]
 
-def log_to_google_sheet(url, status, message):
-    payload = {
-        "url": url,
-        "status": status,
-        "message": message,
-        "eventTimestamp": datetime.datetime.now().isoformat()
-    }
-    try:
-        requests.post(WEBHOOK_URL, json=payload, timeout=10)
-    except Exception as log_err:
-        print(f"LOGGING FAILED: {log_err}")
+# Timestamp for grouping this run
+RUN_TIME = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-for url in URLS:
-    success = False
-    for attempt in range(5):  # Retry 5 times
+def send_log(url, status, message):
+    try:
+        requests.get(SCRIPT_WEB_APP_URL, params={
+            'url': url,
+            'status': status,
+            'message': message,
+            'run': RUN_TIME
+        }, timeout=10)
+    except Exception as e:
+        print(f"⚠️ Failed to log to sheet: {e}")
+
+def try_until_success(url):
+    while True:
         try:
             response = requests.get(url, timeout=15)
             response.raise_for_status()
             print(f"✅ SUCCESS: {url}")
-            log_to_google_sheet(url, "success", f"Status Code: {response.status_code}")
-            success = True
-            break
+            send_log(url, "success", f"Status Code: {response.status_code}")
+            break  # Exit loop if success
         except Exception as e:
-            print(f"❌ FAILED ({attempt+1}): {url} — {e}")
-            time.sleep(3)  # delay between retries
+            print(f"❌ FAILED: {url} — {e}. Retrying in 10s...")
+            send_log(url, "failed", str(e))
+            time.sleep(10)  # Wait before retrying
 
-    if not success:
-        log_to_google_sheet(url, "failed", f"All retries failed.")
+# Run each URL until success
+for url in URLS:
+    try_until_success(url)
