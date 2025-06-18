@@ -22,3 +22,7 @@ jobs:
 
       - name: Run script
         run: python open_links.py
+on:
+  schedule:
+    - cron: '30 3 * * *'  # 9:00 AM IST = 3:30 UTC
+  workflow_dispatch:       # Allows manual runs
