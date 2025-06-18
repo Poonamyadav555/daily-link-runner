@@ -1,16 +1,16 @@
 name: Run Daily Link Script
 
 on:
-  workflow_dispatch:  # lets you trigger manually
+  workflow_dispatch:
   schedule:
-    - cron: '0 10 * * *'  # runs daily at 10:00 UTC (3:30 PM IST)
+    - cron: '0 10 * * *'  # 10:00 UTC = 3:30 PM IST
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Set up Python
@@ -18,5 +18,8 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Run open_links.py
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run Python script
         run: python open_links.py
