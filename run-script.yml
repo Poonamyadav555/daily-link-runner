@@ -2,12 +2,13 @@ name: Daily Link Runner
 
 on:
   schedule:
-    - cron: '30 3 * * *' # 9:00 AM IST
-  workflow_dispatch:
+    - cron: '30 3 * * *'  # 9:00 AM IST = 3:30 UTC
+  workflow_dispatch:       # Allows manual triggering from Actions tab
 
 jobs:
   run-links:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -22,7 +23,3 @@ jobs:
 
       - name: Run script
         run: python open_links.py
-on:
-  schedule:
-    - cron: '30 3 * * *'  # 9:00 AM IST = 3:30 UTC
-  workflow_dispatch:       # Allows manual runs
