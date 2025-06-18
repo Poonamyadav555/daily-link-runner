@@ -3,7 +3,7 @@ name: Run Daily Link Script
 on:
   workflow_dispatch:       # Manual run
   schedule:
-    - cron: '30 3 * * *'   # Daily at 9:00 AM IST (03:30 UTC)
+    - cron: '00 8 * * *'   # Daily at 9:00 AM IST (03:30 UTC)
 
 jobs:
   run-script:
